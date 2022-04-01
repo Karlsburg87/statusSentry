@@ -1,0 +1,5 @@
+keys.txt
+creds.txt
+creds.json
+shared.txt
+**/testOutput/**
