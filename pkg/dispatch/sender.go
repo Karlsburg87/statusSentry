@@ -3,13 +3,12 @@ package dispatch
 import (
 	"bytes"
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 	"time"
 
-	"github.com/karlsburg87/Status/pkg/configuration"
+	"github.com/karlsburg87/statusSentry/pkg/configuration"
 )
 
 //retry is the key for the Send func which allows failed messages to be attempted again in future
@@ -89,7 +88,7 @@ func Sender(destinationURL string, senderFunnel <-chan configuration.Transporter
 	for {
 		select {
 		case t := <-senderFunnel:
-			fmt.Printf("Outbound: %+v\n\n", t)
+			//---fmt.Printf("Outbound: %+v\n\n", t)
 			if gcp {
 				pubsub <- t
 			}

@@ -5,7 +5,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/karlsburg87/Status/pkg/configuration"
+	"github.com/karlsburg87/statusSentry/pkg/configuration"
 )
 
 func TestRunRSSOperations(t *testing.T) {

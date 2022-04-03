@@ -6,7 +6,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/karlsburg87/Status/pkg/configuration"
+	"github.com/karlsburg87/statusSentry/pkg/configuration"
 )
 
 //emailHandler receives alerts via email then recovers the corresponding config item before forwarding on to the sender function

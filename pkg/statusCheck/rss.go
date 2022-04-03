@@ -11,7 +11,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/karlsburg87/Status/pkg/configuration"
+	"github.com/karlsburg87/statusSentry/pkg/configuration"
 )
 
 /*********************************************************

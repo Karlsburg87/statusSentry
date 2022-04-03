@@ -9,9 +9,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/karlsburg87/Status/pkg/configuration"
-	"github.com/karlsburg87/Status/pkg/pinger"
-	statuscheck "github.com/karlsburg87/Status/pkg/statusCheck"
+	"github.com/karlsburg87/statusSentry/pkg/configuration"
+	"github.com/karlsburg87/statusSentry/pkg/pinger"
+	statuscheck "github.com/karlsburg87/statusSentry/pkg/statusCheck"
 )
 
 func main() {

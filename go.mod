@@ -1,4 +1,4 @@
-module github.com/karlsburg87/Status
+module github.com/karlsburg87/statusSentry
 
 go 1.17
 

@@ -3,8 +3,8 @@ package statuscheck
 import (
 	"context"
 
-	"github.com/karlsburg87/Status/pkg/configuration"
-	"github.com/karlsburg87/Status/pkg/dispatch"
+	"github.com/karlsburg87/statusSentry/pkg/configuration"
+	"github.com/karlsburg87/statusSentry/pkg/dispatch"
 )
 
 //Launch quickly launches status check operations - takes a context.Context with cancel

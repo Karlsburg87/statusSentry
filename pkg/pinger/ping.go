@@ -3,14 +3,14 @@ package pinger
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
+	"encoding/json"
 	"log"
 	"net/http"
 	"net/http/httptrace"
 	"time"
 
-	"github.com/karlsburg87/Status/pkg/configuration"
-	"github.com/karlsburg87/Status/pkg/dispatch"
+	"github.com/karlsburg87/statusSentry/pkg/configuration"
+	"github.com/karlsburg87/statusSentry/pkg/dispatch"
 )
 
 func Launch(ctx context.Context, conf <-chan *configuration.Configuration) {
@@ -64,7 +64,7 @@ func ping(config <-chan *configuration.Configuration, logbook map[string]time.Ti
 				continue
 			}
 			for _, page := range item.PollPages {
-				fmt.Printf("pinging %s\n", page)
+				//---fmt.Printf("pinging %s\n", page)
 				//test the response of the page
 				goPoll := pageParcel{
 					url:          page,
@@ -74,7 +74,7 @@ func ping(config <-chan *configuration.Configuration, logbook map[string]time.Ti
 				pageChan <- goPoll
 				//send off data for that page
 				pingDetails := <-goPoll.responseData
-				fmt.Printf("ping response: %+v\n", pingDetails)
+				//---fmt.Printf("ping response: %+v\n", pingDetails)
 				if err := pingDetails.Send(item, sender); err != nil {
 					log.Printf("error on PingResponse.Send for URL %s and error : %v", page, err)
 				}
@@ -91,6 +91,7 @@ type pageParcel struct {
 	config       configuration.Config
 }
 
+//poll runs the ping polling of the URL page with trace and returns through the pageParcel response chan
 func poll(pageChan <-chan pageParcel, client *http.Client) error {
 	//tracing variables
 	var start, dns, tlsHandshake, connect time.Time
@@ -137,6 +138,20 @@ func poll(pageChan <-chan pageParcel, client *http.Client) error {
 			log.Printf("error on client.Do for polling URL %s", page.url)
 			log.Panicln(err)
 		}
+		//get TLS cert info
+		certs := make([]configuration.PingCert, 0)
+		for i, leaf := range res.TLS.PeerCertificates {
+			certificate := configuration.PingCert{
+				ConnVerified: i == 0,
+				Issuer:       leaf.Issuer.CommonName,
+				Subject:      leaf.Subject.CommonName,
+				ValidFrom:    leaf.NotBefore.Format(time.RFC3339),
+				ValidUntil:   leaf.NotAfter.Format(time.RFC3339),
+				IsExpired:    time.Now().After(leaf.NotAfter),
+			}
+			certs = append(certs, certificate)
+		}
+
 		//get ready to record result
 		tme := time.Now()
 		page.responseData <- configuration.PingResponse{
@@ -153,7 +168,55 @@ func poll(pageChan <-chan pageParcel, client *http.Client) error {
 				Connect:       connectDuration.Milliseconds(),
 				FirstResponse: toFirstResponseDuration.Milliseconds(),
 			},
+			Certificates: certs,
 		}
+
+		//Add info on
 	}
 	return nil
+}
+
+//NewPingHTTPHandler returns an http handler function that reuses a single poll goroutine and http client
+func NewPingHTTPHandler() func(w http.ResponseWriter, r *http.Request) {
+	//create constant reusable channels and launch single poll goroutine
+	pageChan := make(chan pageParcel)
+	client := newClient()
+	go poll(pageChan, &client)
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		defer r.Body.Close()
+		//get URL to ping
+		pageURL := r.URL.Query().Get("page")
+		if pageURL == "" { // get it from body json
+			body := make(map[string]interface{})
+			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+				w.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			ok := true
+			pageURL, ok = body["page"].(string)
+			if !ok {
+				w.WriteHeader(http.StatusBadRequest)
+				return
+			}
+		}
+		//send page url to poller
+		rtnChan := make(chan configuration.PingResponse)
+		pageChan <- pageParcel{
+			url:          pageURL,
+			responseData: rtnChan,
+			config: configuration.Config{
+				ServiceName:   "Requested site",
+				DisplayDomain: pageURL,
+				PollPages:     []string{pageURL},
+				PollFrequency: configuration.Frequency(15 * time.Minute),
+			},
+		}
+		result := <-rtnChan
+		//return response to the caller
+		if err := json.NewEncoder(w).Encode(result); err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+	}
 }

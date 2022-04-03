@@ -118,15 +118,16 @@ type PingResponse struct {
 	//StatusPage is the human readable status page URI for the Service
 	//
 	//Metadata as application will read from TargetHook
-	StatusPage    string    `json:"-"`
-	ServiceName   string    `json:"-"`                   //ServiceName is taken from the Config instruction and is the readable name of a group of properties
-	Domain        string    `json:"-"`                   //Domain is taken from the Config instruction and is the readable domain under which PollPages are grouped
-	URL           string    `json:"pinged_url"`          //URL is the URL that was pinged
-	ResponseTimes PingTimes `json:"ping_response_times"` //ResponseTime are the collection of http response times in milliseconds
-	StatusCode    int       `json:"ping_response_code"`  //StatusCode is the http status code 200 or 201 for OK and other RFC codes for various errors
-	ErrorText     string    `json:"ping_error"`          //ErrorText may be either the status code text description or the body of the response if exists and status code is not 200/201
-	Time          string    `json:"ping_time"`           //Time is the timestamp the ping was initiated at in RFC3339 format
-	TimeGo        time.Time `json:"-"`                   //time is Time but in usable format
+	StatusPage    string     `json:"-"`
+	ServiceName   string     `json:"-"`                   //ServiceName is taken from the Config instruction and is the readable name of a group of properties
+	Domain        string     `json:"-"`                   //Domain is taken from the Config instruction and is the readable domain under which PollPages are grouped
+	URL           string     `json:"pinged_url"`          //URL is the URL that was pinged
+	ResponseTimes PingTimes  `json:"ping_response_times"` //ResponseTime are the collection of http response times in milliseconds
+	StatusCode    int        `json:"ping_response_code"`  //StatusCode is the http status code 200 or 201 for OK and other RFC codes for various errors
+	ErrorText     string     `json:"ping_error"`          //ErrorText may be either the status code text description or the body of the response if exists and status code is not 200/201
+	Time          string     `json:"ping_time"`           //Time is the timestamp the ping was initiated at in RFC3339 format
+	Certificates  []PingCert `json:"ping_certs"`          //Certificates are the TLS certificate information of the response server as sent in the response of the ping
+	TimeGo        time.Time  `json:"-"`                   //TimeGo is Time but in usable format
 }
 
 //PingTimes is the collection of http response times in milliseconds
@@ -137,6 +138,16 @@ type PingTimes struct {
 	TLSHandshake  int64 `json:"tls_handshake"`
 	Connect       int64 `json:"connect"`
 	FirstResponse int64 `json:"first_response"`
+}
+
+type PingCert struct {
+	ConnVerified bool   `json:"cert_primary"`     //ConnVerified signifies that this was the certificate the connection was verified against
+	ValidFrom    string `json:"cert_valid_from"`  //ValidFrom is the date the server SSL certificate is considered valid from - RFC3339
+	ValidUntil   string `json:"cert_valid_until"` //ValidUntil is the date the server SSL certificate expires after - RFC3339
+	Issuer       string `json:"cert_issuer"`      //Issuer is the common name of the entity that issued the server TLS cert
+	Subject      string `json:"cert_subject"`     //Subject is common name of the entity to which this cert has been issued
+	IsExpired    bool   `json:"cert_expired"`     //IsExpired is if the server SSL certificate has expired
+
 }
 
 //ToTransport for pingResponse to implement Transports
