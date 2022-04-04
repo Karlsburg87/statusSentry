@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/karlsburg87/statusSentry/launcher"
+	"github.com/karlsburg87/statusSentry/pkg/launcher"
 )
 
 func main() {
