@@ -19,7 +19,7 @@ func init() {
 	twitterBearerToken = os.Getenv("TWITTER_TOKEN")
 	if twitterBearerToken == "" {
 		log.Println("TWITTER_TOKEN must be set to fetch Twitter based status pages")
-		//FIXME: switch off twitter functionality if login not set
+		//switched off twitter functionality if login not set - done in shared.go operator switch statement
 	}
 }
 
@@ -96,8 +96,10 @@ func getTwitterTimeline(twitterID string, serviceLog map[string]time.Time) (twit
 	if _, ok := serviceLog[twitterID]; !ok {
 		serviceLog[twitterID] = time.Now().Add(-24 * time.Hour) //Limit to fetching tweets from max 24 hours ago
 	}
-	uri.Query().Add("start_time", serviceLog[twitterID].Format(time.RFC3339))
-	uri.Query().Add("tweet.fields", "created_at")
+	queryString := uri.Query()
+	queryString.Add("start_time", serviceLog[twitterID].Format(time.RFC3339))
+	queryString.Add("tweet.fields", "created_at")
+	uri.RawQuery = queryString.Encode()
 
 	req, err := http.NewRequest(http.MethodGet, uri.String(), nil)
 	if err != nil {

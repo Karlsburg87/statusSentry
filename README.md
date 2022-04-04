@@ -19,6 +19,9 @@ Settings are established via environment variables
 |`PORT`|The port of the *webhook server*. The *config refresh* server is hardcoded as `8099`. Defaults to 8080|
 |`TWITTER_TOKEN`|Accessing the Twitter API|
 |`CONFIG_LOCATION`|Location the configuration JSON file is kept and updated. Expected to be a public URL endpoint|
+|`STATUS_CHECK_ONLY`|Only runs the status checker service. No ping polling in the config will be checked and returned. Defaults false|
+|`PINGER_ONLY`|Only runs the pinger service. No status pages in the config will be checked and returned. Defaults false|
+|`OUTBOUND_URL`|The URI endpoint to sent status updates and ping polling stats to|
 
 |GCP Pubsub Specific |to disable GCP PubSub set PROJECT_ID to ""|
 |-|-|

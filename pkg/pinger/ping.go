@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/http/httptrace"
+	"os"
 	"time"
 
 	"github.com/karlsburg87/statusSentry/pkg/configuration"
@@ -25,7 +26,7 @@ func Ping(ctx context.Context, conf <-chan *configuration.Configuration) {
 	configs := <-conf
 	//spin up sender that sends to pubsub and other services
 	sender := make(chan configuration.Transporter)
-	go dispatch.Sender("", sender)
+	go dispatch.Sender(os.Getenv("OUTBOUND_URL"), sender)
 	//spin up poller which does the ping and collects the data
 	pinger := make(chan *configuration.Configuration)
 	go ping(pinger, logbook, sender)

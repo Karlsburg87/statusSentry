@@ -2,6 +2,7 @@ package statuscheck
 
 import (
 	"context"
+	"os"
 
 	"github.com/karlsburg87/statusSentry/pkg/configuration"
 	"github.com/karlsburg87/statusSentry/pkg/dispatch"
@@ -22,7 +23,7 @@ func Launch(ctx context.Context, configChan <-chan *configuration.Configuration)
 	}
 
 	go operator(directory)                                                 //the orchestrator goroutine - its pushing of a Config to a Pull type run function initiates the pull
-	go dispatch.Sender("", directory.sender)                               //the goroutine handling sending messages to other microservices TODO: add microservice URL
+	go dispatch.Sender(os.Getenv("OUTBOUND_URL"), directory.sender)        //the goroutine handling sending messages to other microservices TODO: add microservice URL
 	go runStatusWebhookServer(ctx, directory.validators, directory.sender) //also acts as server for email incoming updates
 	go runRSSOperations(directory.rssChan, directory.sender)               //pulls RSS updates periodically
 	go runTwitterOperations(directory.twitterChan, directory.sender)       //pulls Twitter updates periodically

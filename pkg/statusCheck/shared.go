@@ -105,6 +105,9 @@ func operator(dir directory) {
 					case configuration.ServiceRSS:
 						dir.rssChan <- entry
 					case configuration.ServiceTwitter:
+						if twitterBearerToken == "" {
+							continue
+						}
 						dir.twitterChan <- entry
 					}
 				}
