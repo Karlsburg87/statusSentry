@@ -2,8 +2,8 @@
 **statusSentry** is the service that pings pages to check for 
 - uptime 
 - response speed 
-- valid SSL certs *[roadmap]*
-- SSL expiry times *[roadmap]*
+- valid SSL certs 
+- SSL expiry times 
 
 and receives/pulls status updates from status pages from 
 - RSS feeds
@@ -118,5 +118,5 @@ PollPages
   }
 ]
 ```
-## Setting up email with mailcloud
+## Setting up email with Cloudmailin
 Ensure you set the endpoing for webhooks to `/email` endpoint of the server at port `PORT` as set by the envar
