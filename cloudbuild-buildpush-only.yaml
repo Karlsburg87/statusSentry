@@ -8,8 +8,6 @@
 #_IMAGE_NAME : The name to give to the build image in the docker build step
 #_IMAGE_TAG : The version tag to give to the image in the docker build step
 
-#_CLOUD_RUN_NAME : The name of the service you want to deploy to. If the service does not exist yet, this command creates the service during the deployment.  'status-sentry'
-
 #_STATUS_UPDATE_TOPIC : The GCP PubSub topic to post Status Page Updates to
 #_PING_RESPONSE_TOPIC : The GCP PubSub topic to post Ping responses to
 #
