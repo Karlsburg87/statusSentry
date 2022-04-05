@@ -1,0 +1,53 @@
+#Schema for this file: https://cloud.google.com/build/docs/build-config-file-schema
+
+#VARIABLES ---------------
+
+#PROJECT_ID : GCP project ID - automatically filled by Cloud Build
+
+#_ARTIFACT_REPO_NAME : Name of the GCP Cloud Artifacts Repo/bucket
+#_IMAGE_NAME : The name to give to the build image in the docker build step
+#_IMAGE_TAG : The version tag to give to the image in the docker build step
+
+#_CLOUD_RUN_NAME : The name of the service you want to deploy to. If the service does not exist yet, this command creates the service during the deployment.  'status-sentry'
+
+#_STATUS_UPDATE_TOPIC : The GCP PubSub topic to post Status Page Updates to
+#_PING_RESPONSE_TOPIC : The GCP PubSub topic to post Ping responses to
+#
+#_CONFIG_LOCATION : The location of the configuration file for the statusSentry
+#_TWITTER_TOKEN : The Twitter API bearer token to access status update streams on Twitter
+#_OUTBOUND_URL : A URL to a service that statusSentry should push to as well as/instead of PubSub
+#_STATUS_CHECK_ONLY : To run only the status checking not pinger
+#_PINGER_ONLY : To run only the pinger not the status checking
+
+#_PORT :The port that will be used for the webhooks on VM instances. Cloud Run defaults to 8080 
+
+steps:
+# Build Go program using Containerfile/Dockerfile
+- name: 'docker'
+  args: 
+    - 'build'
+    - '-f'
+    - 'Dockerfile'
+    - '-t'
+    - 'europe-west2-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO_NAME}/${_IMAGE_NAME}:${_IMAGE_TAG}'
+    - '--build-arg PROJECT_ID=${PROJECT_ID}' 
+    - '--build-arg CONFIG_LOCATION=${_CONFIG_LOCATION}'
+    - '--build-arg TWITTER_TOKEN=${_TWITTER_TOKEN}' 
+    - '--build-arg OUTBOUND_URL=${_OUTBOUND_URL}'
+    - '--build-arg STATUS_UPDATE_TOPIC=${_STATUS_UPDATE_TOPIC}' 
+    - '--build-arg PING_RESPONSE_TOPIC=${_PING_RESPONSE_TOPIC}' 
+    - '--build-arg STATUS_CHECK_ONLY=${_STATUS_CHECK_ONLY}'
+    - '--build-arg PINGER_ONLY=${_PINGER_ONLY}'
+    - '--build-arg PORT=${_PORT}'
+    - '.'
+
+    
+# Push the container image to Container Registry: https://cloud.google.com/artifact-registry/docs/repositories/create-repos?hl=en-GB#gcloud
+# Image tagging : https://cloud.google.com/artifact-registry/docs/docker/pushing-and-pulling?hl=en-GB#tag
+- name: 'docker'
+  args: 
+    - 'push'
+    - 'europe-west2-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO_NAME}/${_IMAGE_NAME}:${_IMAGE_TAG}'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

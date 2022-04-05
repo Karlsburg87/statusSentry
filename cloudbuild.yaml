@@ -10,11 +10,14 @@
 
 #_CLOUD_RUN_NAME : The name of the service you want to deploy to. If the service does not exist yet, this command creates the service during the deployment.  'status-sentry'
 
-#_CONFIG_LOCATION : The location of the configuration file for the statusSentry
 #_STATUS_UPDATE_TOPIC : The GCP PubSub topic to post Status Page Updates to
 #_PING_RESPONSE_TOPIC : The GCP PubSub topic to post Ping responses to
+#
+#_CONFIG_LOCATION : The location of the configuration file for the statusSentry
 #_TWITTER_TOKEN : The Twitter API bearer token to access status update streams on Twitter
 #_OUTBOUND_URL : A URL to a service that statusSentry should push to as well as/instead of PubSub
+#_STATUS_CHECK_ONLY : To run only the status checking not pinger
+#_PINGER_ONLY : To run only the pinger not the status checking
 
 #_PORT :The port that will be used for the webhooks on VM instances. Cloud Run defaults to 8080 
 
@@ -41,6 +44,7 @@ steps:
     - 'Dockerfile'
     - '-t'
     - 'europe-west2-docker.pkg.dev/$PROJECT_ID/${_ARTIFACT_REPO_NAME}/${_IMAGE_NAME}:${_IMAGE_TAG}'
+    - '.'
 
     
 
@@ -69,7 +73,7 @@ steps:
     - '--port'
     - '8080'
     - '--update-env-vars'
-    - '^;^PROJECT_ID=$PROJECT_ID;CONFIG_LOCATION=${_CONFIG_LOCATION};STATUS_UPDATE_TOPIC=${_STATUS_UPDATE_TOPIC};PING_RESPONSE_TOPIC=${_PING_RESPONSE_TOPIC};TWITTER_TOKEN=${_TWITTER_TOKEN};OUTBOUND_URL=${_OUTBOUND_URL}'
+    - '^;^PROJECT_ID=$PROJECT_ID;CONFIG_LOCATION=${_CONFIG_LOCATION};STATUS_UPDATE_TOPIC=${_STATUS_UPDATE_TOPIC};PING_RESPONSE_TOPIC=${_PING_RESPONSE_TOPIC};TWITTER_TOKEN=${_TWITTER_TOKEN};OUTBOUND_URL=${_OUTBOUND_URL};PINGER_ONLY=${_PINGER_ONLY};STATUS_CHECK_ONLY=${_STATUS_CHECK_ONLY}'
     #https://cloud.google.com/sdk/gcloud/reference/topic/escaping
 
   # Deploy an image from artifacts registry to a VM on Cloud Compute
@@ -90,9 +94,10 @@ steps:
 options:
   logging: CLOUD_LOGGING_ONLY
   env:
-      - 'PROJECT_ID=$PROJECT_ID'
       - 'CONFIG_LOCATION=${_CONFIG_LOCATION}'
       - 'STATUS_UPDATE_TOPIC=${_STATUS_UPDATE_TOPIC}'
       - 'PING_RESPONSE_TOPIC=${_PING_RESPONSE_TOPIC}'
       - 'TWITTER_TOKEN=${_TWITTER_TOKEN}'
       - 'OUTBOUND_URL=${_OUTBOUND_URL}'
+      - 'PINGER_ONLY=${_PINGER_ONLY}'
+      - 'STATUS_CHECK_ONLY=${_STATUS_CHECK_ONLY}'
