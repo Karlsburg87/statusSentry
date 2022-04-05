@@ -30,7 +30,7 @@ func FetchTestConfig() (*Configuration, error) {
 			DisplayDomain: "stripe.com",
 			StatusPage:    "https://status.stripe.com/",
 			TargetHook:    "twitter:@stripestatus",
-			PollFrequency: Frequency(time.Minute),
+			PollFrequency: Frequency(5 * time.Minute),
 			PollPages:     []string{"https://www.stripe.com"},
 		},
 		Config{
@@ -46,7 +46,7 @@ func FetchTestConfig() (*Configuration, error) {
 			DisplayDomain: "salesforce.com",
 			StatusPage:    "https://status.salesforce.com/",
 			TargetHook:    "email:status_alerts@salesforce.com",
-			PollFrequency: Frequency(0), //indicates instant
+			PollFrequency: Frequency(5 * time.Minute), //indicates instant
 			PollPages:     []string{"https://salesforce.com/uk"},
 		},
 		Config{

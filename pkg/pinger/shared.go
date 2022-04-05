@@ -8,11 +8,11 @@ import (
 func newClient() http.Client {
 	return http.Client{
 		Transport: &http.Transport{
-			TLSHandshakeTimeout:   10 * time.Second,
+			TLSHandshakeTimeout:   20 * time.Second,
 			ResponseHeaderTimeout: 30 * time.Second,
 			DisableKeepAlives:     true, //as testing response speed so standardising here
 			ExpectContinueTimeout: 10 * time.Second,
 		},
-		Timeout: 30 * time.Second,
+		Timeout: 50 * time.Second,
 	}
 }

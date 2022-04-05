@@ -4,9 +4,11 @@ import (
 	"context"
 	"crypto/tls"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 	"net/http/httptrace"
+	"net/url"
 	"os"
 	"time"
 
@@ -133,11 +135,18 @@ func poll(pageChan <-chan pageParcel, client *http.Client) error {
 		/*if _, err := http.DefaultTransport.RoundTrip(req); err != nil {
 			log.Fatal(err)
 		}*/
-
+		var issues string
 		res, err := client.Do(req)
 		if err != nil {
 			log.Printf("error on client.Do for polling URL %s", page.url)
-			log.Panicln(err)
+			var toe *url.Error
+			if errors.As(err, &toe) {
+				if toe.Timeout() || toe.Temporary() { //timeout and temporary connection errors should be recorded
+					issues = toe.Err.Error()
+				} else {
+					log.Panicln(err)
+				}
+			}
 		}
 		//get TLS cert info
 		certs := make([]configuration.PingCert, 0)
@@ -170,6 +179,7 @@ func poll(pageChan <-chan pageParcel, client *http.Client) error {
 				FirstResponse: toFirstResponseDuration.Milliseconds(),
 			},
 			Certificates: certs,
+			ErrorText:    issues,
 		}
 
 		//Add info on

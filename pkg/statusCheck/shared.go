@@ -66,7 +66,7 @@ func operator(dir directory) {
 	var err error
 
 	//How often to check pull updates
-	tckr := time.NewTicker(60 * time.Second)
+	tckr := time.NewTicker(3 * time.Minute)
 
 	for {
 		select {

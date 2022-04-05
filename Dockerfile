@@ -1,4 +1,4 @@
-FROM docker.io/library/golang:1-alpine AS build-env
+FROM docker.io/library/golang:1.18-alpine  AS build-env
 WORKDIR /go/src/statusSentry
 
 #Let us cache modules retrieval as they do not change often.
@@ -13,6 +13,9 @@ RUN apk --update add ca-certificates
 #Get source and build binary
 COPY . .
 
+#Need git for Go Get to work. Apline does not have this installed by default
+RUN apk --no-cache add git
+
 #Path to main function
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /statusSentry/bin
 
@@ -26,6 +29,8 @@ ARG CONFIG_LOCATION
 ARG PORT="8080"
 ARG TWITTER_TOKEN
 ARG OUTBOUND_URL
+ARG PINGER_ONLY
+ARG STATUS_CHECK_ONLY
 #GCP Specific
 ARG GOOGLE_APPLICATION_CREDENTIALS
 ARG STATUS_UPDATE_TOPIC
@@ -36,6 +41,8 @@ ENV CONFIG_LOCATION=${CONFIG_LOCATION}
 ENV PORT=${PORT}
 ENV TWITTER_TOKEN=${TWITTER_TOKEN}
 ENV OUTBOUND_URL=${OUTBOUND_URL}
+ENV PINGER_ONLY=${PINGER_ONLY}
+ENV STATUS_CHECK_ONLY=${STATUS_CHECK_ONLY}
 #GCP Specific
 ENV GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
 ENV STATUS_UPDATE_TOPIC=${STATUS_UPDATE_TOPIC}
