@@ -1,4 +1,4 @@
-package configuration
+package gcp
 
 import (
 	"context"
@@ -6,10 +6,11 @@ import (
 	"os"
 
 	"cloud.google.com/go/pubsub"
+	"github.com/karlsburg87/statusSentry/pkg/configuration"
 )
 
 //Publisher publishes to Google Cloud Platform PubSub
-func Publisher(stuff <-chan Transporter) {
+func Publisher(stuff <-chan configuration.Transporter) {
 	//GCP config
 	projectID := os.Getenv("PROJECT_ID")
 	//setup topic names and defaults

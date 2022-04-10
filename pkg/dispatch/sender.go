@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/karlsburg87/statusSentry/pkg/configuration"
+	"github.com/karlsburg87/statusSentry/pkg/gcp"
 )
 
 //retry is the key for the Send func which allows failed messages to be attempted again in future
@@ -73,14 +74,14 @@ func Sender(destinationURL string, senderFunnel <-chan configuration.Transporter
 	//setup PubSub goroutine configs
 	pubsub := make(chan configuration.Transporter)
 	gcpProjectID := os.Getenv("PROJECT_ID")
-	gcp := true
+	isGCP := true
 	if gcpProjectID == "" {
-		gcp = false
+		isGCP = false
 	}
 
 	//run GCP Publisher if GCP details are available
-	if gcp {
-		go configuration.Publisher(pubsub)
+	if isGCP {
+		go gcp.Publisher(pubsub)
 	}
 
 	log.Printf("Sender ready to receive using GCP project '%s' and target URL '%s'", gcpProjectID, destinationURL)
@@ -89,7 +90,7 @@ func Sender(destinationURL string, senderFunnel <-chan configuration.Transporter
 		select {
 		case t := <-senderFunnel:
 			//---fmt.Printf("Outbound: %+v\n\n", t)
-			if gcp {
+			if isGCP {
 				pubsub <- t
 			}
 
